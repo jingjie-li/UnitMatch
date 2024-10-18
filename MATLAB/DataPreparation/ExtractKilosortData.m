@@ -500,30 +500,30 @@ for subsesid = 1:length(KiloSortPaths)
 
             InspectionFlag = 0;
             rerunEx = false;
-            if isempty(dir(fullfile(savePath, '**', 'RawWaveforms'))) || rerunEx  % if raw waveforms have not been extract, decompress data for extraction
-                disp('Extracting sync file...')
-                % detect whether data is compressed, decompress locally if necessary
-                if ~exist(fullfile(Params.tmpdatafolder, strrep(rawD(id).name, 'cbin', 'bin'))) && ~contains(rawD(1).name,'.dat') && ~contains(rawD(1).name,'.raw')
-                    disp('This is compressed data and we do not want to use Python integration... uncompress temporarily')
-                    decompDataFile = bc.dcomp.extractCbinData(fullfile(rawD(id).folder, rawD(id).name), ...
-                        [], [], 0, fullfile(Params.tmpdatafolder, strrep(rawD(id).name, 'cbin', 'bin')));
-                    statusCopy = copyfile(strrep(fullfile(rawD(id).folder, rawD(id).name), 'cbin', 'meta'), strrep(fullfile(Params.tmpdatafolder, rawD(id).name), 'cbin', 'meta')); %QQ doesn't work on linux
-                end
-                Params.DecompressionFlag = 1;
-                [~,~,currext] = fileparts(rawD(id).name);
-
-                if ~exist('statusCopy','var') ||statusCopy == 0 %could not copy meta file - use original meta file
-                    [Imecmeta] = ReadMeta2(fullfile(rawD(id).folder, strrep(rawD(id).name, currext, '.meta')), 'ap');
-                else
-                    [Imecmeta] = ReadMeta2(fullfile(Params.tmpdatafolder, strrep(rawD(id).name, currext, '.meta')), 'ap');
-                end
-                nchan = strsplit(Imecmeta.acqApLfSy, ',');
-                nChansInFile = str2num(nchan{1}) + str2num(nchan{3});
-
-                syncDatImec = extractSyncChannel(fullfile(Params.tmpdatafolder, strrep(rawD(id).name, currext, '.bin')), nChansInFile, nChansInFile); %Last channel is sync (function of spikes toolbox)
-                statusCopy = copyfile(fullfile(Params.tmpdatafolder, strrep(rawD(id).name, currext, '_sync.dat')), fullfile(rawD(id).folder, strrep(rawD(id).name, '.cbin', '_sync.dat'))); %QQ doesn't work on linux
-
-            end
+%             if isempty(dir(fullfile(savePath, '**', 'RawWaveforms'))) || rerunEx  % if raw waveforms have not been extract, decompress data for extraction
+%                 disp('Extracting sync file...')
+%                 % detect whether data is compressed, decompress locally if necessary
+%                 if ~exist(fullfile(Params.tmpdatafolder, strrep(rawD(id).name, 'cbin', 'bin'))) && ~contains(rawD(1).name,'.dat') && ~contains(rawD(1).name,'.raw')
+%                     disp('This is compressed data and we do not want to use Python integration... uncompress temporarily')
+%                     decompDataFile = bc.dcomp.extractCbinData(fullfile(rawD(id).folder, rawD(id).name), ...
+%                         [], [], 0, fullfile(Params.tmpdatafolder, strrep(rawD(id).name, 'cbin', 'bin')));
+%                     statusCopy = copyfile(strrep(fullfile(rawD(id).folder, rawD(id).name), 'cbin', 'meta'), strrep(fullfile(Params.tmpdatafolder, rawD(id).name), 'cbin', 'meta')); %QQ doesn't work on linux
+%                 end
+%                 Params.DecompressionFlag = 1;
+%                 [~,~,currext] = fileparts(rawD(id).name);
+% 
+%                 if ~exist('statusCopy','var') ||statusCopy == 0 %could not copy meta file - use original meta file
+%                     [Imecmeta] = ReadMeta2(fullfile(rawD(id).folder, strrep(rawD(id).name, currext, '.meta')), 'ap');
+%                 else
+%                     [Imecmeta] = ReadMeta2(fullfile(Params.tmpdatafolder, strrep(rawD(id).name, currext, '.meta')), 'ap');
+%                 end
+%                 nchan = strsplit(Imecmeta.acqApLfSy, ',');
+%                 nChansInFile = str2num(nchan{1}) + str2num(nchan{3});
+% 
+%                 syncDatImec = extractSyncChannel(fullfile(Params.tmpdatafolder, strrep(rawD(id).name, currext, '.bin')), nChansInFile, nChansInFile); %Last channel is sync (function of spikes toolbox)
+%                 statusCopy = copyfile(fullfile(Params.tmpdatafolder, strrep(rawD(id).name, currext, '_sync.dat')), fullfile(rawD(id).folder, strrep(rawD(id).name, '.cbin', '_sync.dat'))); %QQ doesn't work on linux
+% 
+%             end
             if ~qMetricsExist || Params.RedoQM
                 % First check if we want to use python for compressed data. If not, uncompress data first
                 if any(strfind(rawD(id).name, 'cbin')) && Params.DecompressLocal && isempty(dir(fullfile(savePath, '**', 'RawWaveforms')))
