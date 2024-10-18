@@ -14,6 +14,8 @@ tempsUnW = nan(nclus,size(sp.tempsUnW,2),size(sp.tempsUnW,3));
 templateDuration = nan(nclus,1);
 waveforms = nan(nclus,size(sp.waveforms,2));
 
+assert(length(sp.cgs)==nclus,'you have unlabeled cluster in your manual curation!');
+
 emptyclus = [];
 for clusid=1:nclus
     oriclusid = unique(sp.spikeTemplates(find(sp.clu == clusinfo.cluster_id(clusid))));
