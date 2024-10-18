@@ -17,7 +17,7 @@
 
 %% Add required and optional paths and subpaths
 
-GithubDir = 'C:\Users\user_name\Documents\GitHub'; % Github directory
+GithubDir = '/home/jingjie/repos/'; % Github directory
 
 % Required (for using UnitMatch):
 addpath(genpath(fullfile(GithubDir,'spikes'))) % https://github.com/cortex-lab/spikes
@@ -33,12 +33,14 @@ addpath(genpath(fullfile(GithubDir,'UnitMatch'))) % Make sure to have this one f
 %% User input
 
 % This is the path where the results will be saved ('\\path\to\save\UnitMatch'), e.g.:
-UMparam.SaveDir = 'D:\MatchingUnits\Output\UnitMatch'; 
+UMparam.SaveDir = '/media/jingjie/spike/spk_sorting/sndmap/JLI-R-0042_unitmatch_20240903_06'; 
 
 % This is a cell array with a path to each recording's Kilosort output directory, where there should be a subfolder called 'RawWaveforms'. 
 % N.B. if you want to use the functional score evaluation of UnitMatch, 'KSDir' should also contain the Kilosort output (e.g. spike times etc.)/
 % Takes the form of "{'\\path\to\firstrecording','\\path\to\secondrecording','\\path\to\nthrecording'};", e.g.:  
- UMparam.KSDir = {'D:\MatchingUnits\Data\tmp\Mouse1\AL032\2019-11-21\Probe0\1','D:\MatchingUnits\Data\tmp\Mouse1\AL032\2019-11-22\Probe0\1'};  
+path_info_1 = utils.find_npx_recording_dir('/media/jingjie/spike/spk_sorting/sndmap/JLI-R-0042_2024-09-03_09-35-00_g0');
+path_info_2 = utils.find_npx_recording_dir('/media/jingjie/spike/spk_sorting/sndmap/JLI-R-0042_2024-09-06_09-40-00_g0');
+UMparam.KSDir = {path_info_1.spk_sorting_path,path_info_2.spk_sorting_path};  
 
  
 %% Get recording information
@@ -51,10 +53,11 @@ UMparam.SaveDir = 'D:\MatchingUnits\Output\UnitMatch';
 % and will generate a "PreparedData.mat" file that will be useful in the next section. 
 % RawDataPaths and AllChannelPos will be found automatically.
 % Optionally, it will decompresse cbin to bin data and can use BOMBCELL quality metric to define good single units. 
-UMparam.RunQualityMetrics = 1 % This assumes you run Bombcell, if not please set this to 0.
+UMparam.RunQualityMetrics = 1; % This assumes you run Bombcell, if not please set this to 0.
  % For other Default parameters, please see
  % DefaultParametersExtractKSData.m. Specifify all UMparam that should be
  % different from the default before running ExtractKilosortData
+UMparam.RunQualityMetrics=0;
 UMparam = ExtractKilosortData(UMparam.KSDir, UMparam);
 
 % You can also force the raw data paths as a 3rd argument: UMparam = ExtractKilosortData(KiloSortPaths, UMparam, RawDataPaths);
@@ -75,6 +78,9 @@ UMparam = ExtractKilosortData(UMparam.KSDir, UMparam);
 
 % If you use kilosort and have used "ExtractKilosortData" above to generate the "PreparedData.mat" files, you can use:
 clusinfo = getClusinfo(UMparam.KSDir); 
+mapFunction = @(x) ~(strcmp(x, 'mua  ') || strcmp(x, 'good '));
+Remove_Idx = arrayfun(@(i) mapFunction(clusinfo.group(i,:)), 1:size(clusinfo.group, 1))' | clusinfo.n_spikes<100;
+clusinfo.Good_ID = ~Remove_Idx; %doing both Good and MUA
 
 % -- IF NOT --
 % In this part, you will have to generate "clusinfo", a structure that contains basic information about the clusters:
