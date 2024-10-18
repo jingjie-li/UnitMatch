@@ -89,7 +89,7 @@ if all(ismember({'refPopRank','ISIRank'},MatchTable.Properties.VariableNames))
     PairsFunc(r == c, :) = [];
     PairsFunc = sort(PairsFunc, 2, 'ascend');
     PairsFunc = unique(PairsFunc, 'stable', 'rows');
-    Pairs = cat(2, Pairs, arrayfun(@(X) PairsFunc(X, :), 1:length(PairsFunc), 'Uni', 0)); % Add these for plotting - inspection
+    Pairs = cat(2, Pairs, arrayfun(@(X) PairsFunc(X, :), 1:height(PairsFunc), 'Uni', 0)); % Add these for plotting - inspection
 end
 % 
 % % Results from Yuan et al.?
