@@ -45,17 +45,15 @@ for id = 1 %:2 % Loop: first use model that was used, then see if standard model
     %% Assuming UnitMatch worked, how many units were tracked?
     if id == 1
         if UMparam.GoodUnitsOnly
-            if UMparam.GoodUnitsOnly
-                GoodId = logical(UniqueIDConversion.GoodID);
-            else
-                GoodId = true(1, length(UniqueIDConversion.GoodID));
-            end
-            UniqueID = UniqueIDConversion.UniqueID(GoodId);
-            OriID = UniqueIDConversion.OriginalClusID(GoodId);
-            OriIDAll = UniqueIDConversion.OriginalClusID;
-            recses = UniqueIDConversion.recsesAll(GoodId);
-            recsesall = UniqueIDConversion.recsesAll;
+            GoodId = logical(UniqueIDConversion.GoodID);
+        else
+            GoodId = true(1, length(UniqueIDConversion.GoodID));
         end
+        UniqueID = UniqueIDConversion.UniqueID(GoodId);
+        OriID = UniqueIDConversion.OriginalClusID(GoodId);
+        OriIDAll = UniqueIDConversion.OriginalClusID;
+        recses = UniqueIDConversion.recsesAll(GoodId);
+        recsesall = UniqueIDConversion.recsesAll;
         TrackingPerformance = nan(3, 0); % Difference between recording number, % Tracked units %maximum possibility
         MatchProb = reshape(MatchTable.MatchProb, nclus, nclus);
         for did1 = 1:ndays
