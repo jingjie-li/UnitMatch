@@ -169,6 +169,7 @@ for uid = 1:nclus
         % assume they all have the same configuration
         channelpos = Allchannelpos{1};
     end
+    available_channels = ~isnan(channelpos(:,2));
     % Figure out drift (by number of channels)
     if ImposeDrift~=0
         [val,id1,id2] = unique(diff(channelpos(:,3)));
@@ -203,7 +204,7 @@ for uid = 1:nclus
     end
 
     % Extract channel positions that are relevant and extract mean location
-    [~,MaxChanneltmp] = nanmax(nanmax(abs(nanmean(spikeMap(waveidx_up,:,:),3)),[],1));
+    [~,MaxChanneltmp] = nanmax(nanmax(abs(nanmean(spikeMap(waveidx_up,available_channels,:),3)),[],1));
     try
     OriChanIdx = find(cell2mat(arrayfun(@(Y) vecnorm(channelpos(MaxChanneltmp,:)-channelpos(Y,:)),1:size(channelpos,1),'UniformOutput',0))<param.TakeChannelRadius); %Averaging over 10 channels helps with drift
     catch

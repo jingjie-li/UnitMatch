@@ -29,7 +29,36 @@ else
 
 end
 st = double(ss)/spikeStruct.sample_rate;
-spikeTemplates = readNPY(fullfile(ksDir, 'spike_templates.npy')); % note: zero-indexed
+% load spike templates (= waveforms)
+if exist(fullfile(ksDir, 'spike_clusters.npy'),'file')
+   spike_cluster = readNPY(fullfile(ksDir, 'spike_clusters.npy')); % already manually-curated / Ks4-n KS4, "spike_templates" is called "spike_clusters"
+   spikeTemplates = readNPY(fullfile(ksDir, 'spike_templates.npy'));
+   if max(spike_cluster) >= max(spikeTemplates)
+       % user did some manual curation cluster split on this recording
+       % session, so n_clusters is larger than n_templates
+       %
+       % to solve this, we need to see how many new clusters were generated
+       % first, and then for each new cluster, we need to go back and see
+       % which old cluster can be matched. Jingjie Li
+       spikeTemplates_uq = unique(spikeTemplates);
+       new_cluster_index = max(spikeTemplates):max(spike_cluster);
+    
+       new_cluster_matched_template_index = 0*new_cluster_index';
+       for ii = 1:numel(new_cluster_index)
+           item_index = find(spike_cluster==new_cluster_index(ii));
+           if isempty(item_index)
+               % empty cluster index from manual curation
+               new_cluster_matched_template_index(ii) = 1;
+           else
+               new_cluster_matched_template_index(ii) = spikeTemplates(item_index(1));
+           end
+       end
+       spikeTemplates_uq = [spikeTemplates_uq;new_cluster_matched_template_index];
+   end
+   spikeTemplates = spike_cluster;
+else 
+  spikeTemplates = readNPY(fullfile(ksDir, 'spike_templates.npy')); 
+end
 
 if exist(fullfile(ksDir,'spike_datasets.npy'))
     datas = readNPY(fullfile(ksDir,'spike_datasets.npy'));
@@ -58,6 +87,9 @@ end
 if params.loadPCs
     pcFeat = readNPY(fullfile(ksDir,'pc_features.npy')); % nSpikes x nFeatures x nLocalChannels
     pcFeatInd = readNPY(fullfile(ksDir,'pc_feature_ind.npy')); % nTemplates x nLocalChannels
+    if exist('spikeTemplates_uq','var')
+        pcFeatInd = pcFeatInd(spikeTemplates_uq+1, :);
+    end
 else
     pcFeat = [];
     pcFeatInd = [];
@@ -116,6 +148,9 @@ end
 coords = readNPY(fullfile(ksDir, 'channel_positions.npy'));
 ycoords = coords(:,2); xcoords = coords(:,1);
 temps = readNPY(fullfile(ksDir, 'templates.npy'));
+if exist('spikeTemplates_uq','var')
+    temps = temps(spikeTemplates_uq+1, :, :);
+end
 
 winv = readNPY(fullfile(ksDir, 'whitening_mat_inv.npy'));
 
